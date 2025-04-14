@@ -3,10 +3,13 @@ import unicodedata
 import requests
 
 url = "https://fr.wiktionary.org/wiki/"
-headers = {'User-Agent': 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:35.0) Gecko/20100101 Firefox/35.0',}
+headers = {'User-Agent': 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:35.0) Gecko/20100101 Firefox/35.0'}
 
 def _get_etymology(name: str) -> list:
     response = requests.get(url + name, headers=headers)
+
+    if response.status_code == 404:
+        raise Exception(f'The word "{name}" is not in Wiktionnaire !')
 
     soup = BeautifulSoup(response.text, 'html.parser')
 
@@ -106,7 +109,7 @@ def _get_defs(name: str):
 
 class Word:
     def __init__(self, name: str):
-        self.name = name
+        self.name = name.lower()
 
         self.etymologys = _get_etymology(self.name)
         self.definitions = _get_defs(self.name)
